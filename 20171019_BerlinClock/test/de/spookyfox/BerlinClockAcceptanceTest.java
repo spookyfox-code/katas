@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.spookyfox.BerlinClock;
 import de.spookyfox.berlinclock.BerlinTimeConverter;
 import de.spookyfox.berlinclock.BerlinTimeWriter;
 import de.spookyfox.berlinclock.TimeReader;
@@ -17,16 +16,18 @@ import de.spookyfox.berlinclock.write.ConsoleBerlinTimeWriter;
 
 public class BerlinClockAcceptanceTest {
 
-	private String digitalTime;
-	private StringBuffer outputBuffer;
 	private BerlinClock clock;
+
+	private MockedArguments arguments;
+	private MockedConsole console;
 
 	@Before
 	public void setUp() {
-		outputBuffer = new StringBuffer();
+		arguments = new MockedArguments();
+		console = new MockedConsole();
 
-		TimeReader reader = new ArgumentTimeReader(new MockedArguments());
-		BerlinTimeWriter writer = new ConsoleBerlinTimeWriter(new MockedConsole());
+		TimeReader reader = new ArgumentTimeReader(arguments);
+		BerlinTimeWriter writer = new ConsoleBerlinTimeWriter(console);
 		BerlinTimeConverter converter = new BerlinTimeConverterImpl();
 
 		clock = new BerlinClock(reader, converter, writer);
@@ -40,22 +41,26 @@ public class BerlinClockAcceptanceTest {
 	}
 
 	private void arrangeDigitalTime(String digitalTime) {
-		this.digitalTime = digitalTime;
+		arguments.digitalTime = digitalTime;
 	}
 
 	private void assertBerlinTime(String expectedBerlinTime) {
-		assertEquals(expectedBerlinTime, outputBuffer.toString());
+		assertEquals(expectedBerlinTime, console.text);
 	}
 
 	private class MockedArguments implements Arguments {
+		public String digitalTime;
+
 		public @Override String[] getArguments() {
 			return new String[] { digitalTime };
 		}
 	}
 
 	private class MockedConsole implements Console {
+		public String text;
+
 		public @Override void display(String text) {
-			outputBuffer.append(text);
+			this.text = text;
 		}
 	}
 
